@@ -15,8 +15,6 @@ pipeline {
   environment {
     BUILD_HASH = '${BUILD_NUMBER}'
     BUILD_HASH_ID = sh (script: "git log -n 1 --pretty=format:'%H'", returnStdout: true).take(7)
-    EMAIL_FROM = 'cicd.devops@ishafoundation.org'
-    EMAIL_TO = 'senthil'
     DIST_ARCHIVE_VAR="dist.${JOB_NAME}-${BUILD_ID}.tar.gz"
     GIT_CREDS=credentials('github_cicd_user')
    }
@@ -28,17 +26,17 @@ pipeline {
                 echo 'Building Docker image'
                  print 'BUILD_HASH_ID=' + BUILD_HASH_ID
                  sh 'docker image prune -af'
-                 sh 'docker build -f Dockerfile-eks -t ishafoundationinc/k8s-dev-ishangam:${BUILD_HASH_ID} .'
+                 sh 'docker build -f Dockerfile -t rajitpaul/argocd-sample-app:${BUILD_HASH_ID} .'
               }
         }
       stage('Push Docker Image to Dockerhub') {
           steps {
 
-            withCredentials([usernamePassword(credentialsId: 'dockerhub-ishacicddevops-user-id', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+            withCredentials([usernamePassword(credentialsId: 'rajit-dockerhub', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
             echo 'Login Dockerhub'
-            echo ''' "$DOCKERHUB_PASS" | docker login -u $DOCKERHUB_USER --password-stdin https://index.docker.io/v1/ '''
+            echo ''' "$DOCKERHUB_PASS" | docker login -u $DOCKERHUB_USER --password-stdin '''
             echo 'Pushing Docker image to Dockerhub'
-            sh 'docker push ishafoundationinc/k8s-dev-ishangam:${BUILD_HASH_ID}'
+            sh 'docker push rajitpaul/argocd-sample-app:${BUILD_HASH_ID}'
 
             }
           }
@@ -55,10 +53,10 @@ pipeline {
       stage('Check the contents of argocd manifest repo'){
         steps{
           script{
-            dir("argocd/apps/dev/ishangam-web")
+            dir("argocd/apps/dev/sample-app")
             {
-              sh 'sed -i "s#ishafoundationinc/k8s-dev-ishangam:.*#ishafoundationinc/k8s-dev-ishangam:${BUILD_HASH_ID}#" dev-ishangam-web-deploy.yaml'
-              sh 'cat dev-ishangam-web-deploy.yaml'
+              sh 'sed -i "s#rajitpaul/argocd-sample-app:.*#rajitpaul/argocd-sample-app:${BUILD_HASH_ID}#" deploy.yaml'
+              sh 'cat deploy.yaml'
             }
           }
         }
