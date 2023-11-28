@@ -32,9 +32,9 @@ pipeline {
       stage('Push Docker Image to Dockerhub') {
           steps {
 
-            withCredentials([usernamePassword(credentialsId: 'rajit-dockerhub', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+            withCredentials([usernamePassword(credentialsId: 'rajit-dockerhub', usernameVariable: 'DOCKER_REGISTRY_USER', passwordVariable: 'DOCKER_REGISTRY_PWD')]) {
             echo 'Login Dockerhub'
-            echo ''' "$DOCKERHUB_PASS" | docker login -u $DOCKERHUB_USER --password-stdin '''
+            echo ''' "$DOCKER_REGISTRY_PWD | docker login -u $DOCKER_REGISTRY_USER --password-stdin '''
             echo 'Pushing Docker image to Dockerhub'
             sh 'docker push rajitpaul/argocd-sample-app:${BUILD_HASH_ID}'
 
