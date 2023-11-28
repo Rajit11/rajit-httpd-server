@@ -34,7 +34,7 @@ pipeline {
 
             withCredentials([usernamePassword(credentialsId: 'rajit-dockerhub', usernameVariable: 'DOCKER_REGISTRY_USER', passwordVariable: 'DOCKER_REGISTRY_PWD')]) {
             echo 'Login Dockerhub'
-            echo ''' "$DOCKER_REGISTRY_PWD | docker login -u $DOCKER_REGISTRY_USER --password-stdin '''
+            sh ''' "docker login -u ${DOCKER_REGISTRY_USER} -p ${DOCKER_REGISTRY_PWD}" '''
             echo 'Pushing Docker image to Dockerhub'
             sh 'docker push rajitpaul/argocd-sample-app:${BUILD_HASH_ID}'
 
